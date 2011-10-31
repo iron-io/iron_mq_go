@@ -54,6 +54,7 @@ func (c *Client) req(method, endpoint string, body []byte) (map[string]interface
 	if err != nil {
 		return nil, err
 	}
+	resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		msg, _ := data["msg"].(string)
