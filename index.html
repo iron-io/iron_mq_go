@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+  <title>Package ironmq - The Go Programming Language</title>
+
+<link rel="stylesheet" href="all.css" type="text/css" media="all" charset="utf-8">
+<!--[if lt IE 8]>
+<link rel="stylesheet" href="/doc/ie.css" type="text/css">
+<![endif]-->
+<script type="text/javascript" src="godocs.js"></script>
+</head>
+<body>
+<div id="container">
+  <div id="topnav">
+    <h1 id="title">The Go Programming Language</h1>
+  </div>
+  <div id="content">
+  <!-- Menu is HTML-escaped elsewhere -->
+  
+
+  
+    <h1 id="generatedHeader">Package ironmq</h1>
+  
+  
+
+  <!-- The Table of Contents is automatically inserted in this <div>.
+       Do not delete this <div>. -->
+  <div id="nav"></div>
+
+  <!-- Content is HTML-escaped elsewhere -->
+  <!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+
+
+	<!-- PackageName is printed as title by the top-level template -->
+	
+		<p><code>import "ironmq_go"</code></p>
+	
+	
+	
+		
+			<p>
+			<h4>Package files</h4>
+			<span style="font-size:90%">
+			
+				<a href="https://github.com/iron-io/ironmq_go/blob/master/ironmq.go">ironmq.go</a>
+			
+			</span>
+			</p>
+		
+	
+	
+	
+	
+	
+		
+			
+			<h2 id="Client">type <a href="https://github.com/iron-io/ironmq_go/blob/master/ironmq.go#L3">Client</a></h2>
+			<p>
+A Client contains an Iron.io project ID and a token for authentication.
+</p>
+
+			<p><pre>type Client struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre></p>
+			
+			
+			
+				
+				<h3 id="Client.NewClient">func <a href="https://github.com/iron-io/ironmq_go/blob/master/ironmq.go#L10">NewClient</a></h3>
+				<p><code>func NewClient(projectId, token string) *Client</code></p>
+				<p>
+NewClient returns a new Client using the given project ID and token.
+The network is not used during this call.
+</p>
+
+			
+			
+				
+				<h3 id="Client.Queue">func (*Client) <a href="https://github.com/iron-io/ironmq_go/blob/master/ironmq.go#L64">Queue</a></h3>
+				<p><code>func (c *Client) Queue(name string) *Queue</code></p>
+				<p>
+Queue returns a Queue using the given name.
+The network is not used during this call.
+</p>
+
+			
+		
+			
+			<h2 id="Error">type <a href="https://github.com/iron-io/ironmq_go/blob/master/ironmq.go#L14">Error</a></h2>
+			
+			<p><pre>type Error struct {
+    Status int
+    Msg    string
+}</pre></p>
+			
+			
+			
+			
+				
+				<h3 id="Error.String">func (*Error) <a href="https://github.com/iron-io/ironmq_go/blob/master/ironmq.go#L19">String</a></h3>
+				<p><code>func (e *Error) String() string</code></p>
+				
+			
+		
+			
+			<h2 id="Message">type <a href="https://github.com/iron-io/ironmq_go/blob/master/ironmq.go#L108">Message</a></h2>
+			
+			<p><pre>type Message struct {
+    Id   string `json:&#34;id,omitempty&#34;`
+    Body string `json:&#34;body&#34;`
+    <span class="comment">// Timeout is the amount of time allowed for processing a message.</span>
+    Timeout int64 `json:&#34;timeout,omitempty&#34;`
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre></p>
+			
+			
+			
+			
+				
+				<h3 id="Message.Delete">func (*Message) <a href="https://github.com/iron-io/ironmq_go/blob/master/ironmq.go#L116">Delete</a></h3>
+				<p><code>func (m *Message) Delete() os.Error</code></p>
+				
+			
+		
+			
+			<h2 id="Queue">type <a href="https://github.com/iron-io/ironmq_go/blob/master/ironmq.go#L57">Queue</a></h2>
+			<p>
+Queue represents an IronMQ queue.
+</p>
+
+			<p><pre>type Queue struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre></p>
+			
+			
+			
+			
+				
+				<h3 id="Queue.Get">func (*Queue) <a href="https://github.com/iron-io/ironmq_go/blob/master/ironmq.go#L70">Get</a></h3>
+				<p><code>func (q *Queue) Get() (*Message, os.Error)</code></p>
+				<p>
+Get takes one Message off of the queue. The Message will be returned to the queue
+if not deleted before the item&#39;s timeout.
+</p>
+
+			
+				
+				<h3 id="Queue.Push">func (*Queue) <a href="https://github.com/iron-io/ironmq_go/blob/master/ironmq.go#L100">Push</a></h3>
+				<p><code>func (q *Queue) Push(msg string) os.Error</code></p>
+				<p>
+Push adds a message to the queue using IronMQ&#39;s default timeout of 10 minutes.
+</p>
+
+			
+				
+				<h3 id="Queue.PushTimeout">func (*Queue) <a href="https://github.com/iron-io/ironmq_go/blob/master/ironmq.go#L104">PushTimeout</a></h3>
+				<p><code>func (q *Queue) PushTimeout(msg string, timeout int64) os.Error</code></p>
+				
+			
+		
+	
+	
+
+
+  </div>
+  <div id="site-info">
+    <p>Build version release.r60.3 10073+. Except as noted, this content is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 License</a>.</p>
+  </div>
+</div>
+</body>
+</html>
