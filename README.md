@@ -8,6 +8,8 @@ Install the package:
 
     goinstall github.com/iron-io/ironmq_go
 
+The API is documented [here](https://iron-io.github.com/ironmq_go/).
+
 The Basics
 ==========
 **Initialize** a client and get a queue object:
