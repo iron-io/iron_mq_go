@@ -26,7 +26,7 @@ The Basics
     msg, err := queue.Get()
 
 When you pop/get a message from the queue, it will *not* be deleted. It will
-eventualy go back onto the queue after a timeout if you don't delete it. (The
+eventually go back onto the queue after a timeout if you don't delete it. (The
 default timeout is 10 minutes.)
 
 **Delete** a message from the queue:
