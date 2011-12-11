@@ -39,6 +39,7 @@ func (c *Client) req(method, endpoint string, body []byte) (map[string]interface
 	}
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
+		req.ContentLength = int64(len(body))
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -82,7 +83,6 @@ func (q *Queue) Get() (*Message, os.Error) {
 	if err != nil {
 		return nil, err
 	}
-	var body string
 	body, ok := resp["body"].(string)
 	if !ok {
 		return nil, os.NewError("Body is not a string")
