@@ -73,8 +73,8 @@ func (c *Client) req(method, endpoint string, body []byte) (map[string]interface
 
 // Queue represents an IronMQ queue.
 type Queue struct {
-	name string
-	c    *Client
+	name   string
+	Client *Client
 }
 
 // Queue returns a Queue using the given name.
@@ -86,7 +86,7 @@ func (c *Client) Queue(name string) *Queue {
 // Get takes one Message off of the queue. The Message will be returned to the queue
 // if not deleted before the item's timeout.
 func (q *Queue) Get() (*Message, os.Error) {
-	resp, err := q.c.req("GET", "queues/"+q.name+"/messages", nil)
+	resp, err := q.Client.req("GET", "queues/"+q.name+"/messages", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (q *Queue) push(msg *Message) os.Error {
 	if err != nil {
 		return err
 	}
-	_, err = q.c.req("POST", "queues/"+q.name+"/messages", data)
+	_, err = q.Client.req("POST", "queues/"+q.name+"/messages", data)
 	if err != nil {
 		return err
 	}
@@ -131,6 +131,6 @@ type Message struct {
 }
 
 func (m *Message) Delete() os.Error {
-	_, err := m.q.c.req("DELETE", "queues/"+m.q.name+"/messages/"+m.Id, nil)
+	_, err := m.q.Client.req("DELETE", "queues/"+m.q.name+"/messages/"+m.Id, nil)
 	return err
 }
