@@ -11,6 +11,7 @@ import (
 
 // A Client contains an Iron.io project ID and a token for authentication.
 type Client struct {
+	Debug     bool
 	projectId string
 	token     string
 }
@@ -18,7 +19,7 @@ type Client struct {
 // NewClient returns a new Client using the given project ID and token.
 // The network is not used during this call.
 func NewClient(projectId, token string) *Client {
-	return &Client{projectId, token}
+	return &Client{projectId: projectId, token: token}
 }
 
 type Error struct {
@@ -46,8 +47,14 @@ func (c *Client) req(method, endpoint string, body []byte) (map[string]interface
 		return nil, err
 	}
 
-	//dump, _ := http.DumpResponse(resp, true)
-	//fmt.Printf("%s\n", dump)
+	if c.Debug {
+		dump, err := http.DumpResponse(resp, true)
+		if err != nil {
+			fmt.Println("error dumping response:", err)
+		} else {
+			fmt.Printf("%s\n", dump)
+		}
+	}
 
 	jDecoder := json.NewDecoder(resp.Body)
 	data := map[string]interface{}{}
