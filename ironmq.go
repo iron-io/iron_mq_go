@@ -27,6 +27,8 @@ type Error struct {
 	Msg    string
 }
 
+var EmptyQueue = os.NewError("queue is empty")
+
 func (e *Error) String() string { return fmt.Sprintf("Status %d: %s", e.Status, e.Msg) }
 
 func (c *Client) req(method, endpoint string, body []byte) (map[string]interface{}, os.Error) {
@@ -92,7 +94,7 @@ func (q *Queue) Get() (*Message, os.Error) {
 	}
 	body, ok := resp["body"].(string)
 	if !ok {
-		return nil, os.NewError("Body is not a string")
+		return nil, EmptyQueue
 	}
 	id, ok := resp["id"].(string)
 	if !ok {

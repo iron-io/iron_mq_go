@@ -17,6 +17,9 @@ func TestFunctionality(t *testing.T) {
 	for err == nil {
 		_, err = queue.Get()
 	}
+	if err != EmptyQueue {
+		t.Fatalf("queue.Get: expected empty queue error, got: %s", err)
+	}
 
 	const body = "Hello, IronMQ!"
 	err = queue.Push(body)
