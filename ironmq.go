@@ -103,7 +103,16 @@ func (q *Queue) Get() (*Message, os.Error) {
 	return &Message{Id: id, Body: body, q: q}, nil
 }
 
-func (q *Queue) push(msg *Message) os.Error {
+// Push adds a message to the end of the queue using IronMQ's defaults:
+//	timeout - 60 seconds
+//	delay - none
+func (q *Queue) Push(msg string) os.Error {
+	return q.PushMsg(&Message{Body: msg})
+}
+
+// PushMsg adds a message to the end of the queue using the fields of msg as
+// parameters. msg.Id is ignored.
+func (q *Queue) PushMsg(msg *Message) os.Error {
 	data, err := json.Marshal(msg)
 	if err != nil {
 		return err
@@ -115,21 +124,16 @@ func (q *Queue) push(msg *Message) os.Error {
 	return nil
 }
 
-// Push adds a message to the queue using IronMQ's default timeout of 10 minutes.
-func (q *Queue) Push(msg string) os.Error {
-	return q.push(&Message{Body: msg})
-}
-
-func (q *Queue) PushTimeout(msg string, timeout int64) os.Error {
-	return q.push(&Message{Body: msg, Timeout: timeout})
-}
-
 type Message struct {
 	Id   string `json:"id,omitempty"`
 	Body string `json:"body"`
-	// Timeout is the amount of time allowed for processing a message.
+	// Timeout is the amount of time in seconds allowed for processing the
+	// message.
 	Timeout int64 `json:"timeout,omitempty"`
-	q       *Queue
+	// Delay is the amount of time in seconds to wait before adding the
+	// message to the queue.
+	Delay int64 `json:"delay,omitempty"`
+	q     *Queue
 }
 
 func (m *Message) Delete() os.Error {
