@@ -85,6 +85,26 @@ func (c *Client) Queue(name string) *Queue {
 	return &Queue{name, c}
 }
 
+// QueueInfo provides general information about a queue.
+type QueueInfo struct {
+	Size int // number of items available on the queue
+}
+
+// Info retrieves a QueueInfo structure for the queue.
+func (q *Queue) Info() (*QueueInfo, os.Error) {
+	var qi QueueInfo
+	resp, err := q.Client.req("GET", "queues/"+q.name, nil)
+	if err != nil {
+		return nil, err
+	}
+	size, ok := resp["size"].(float64)
+	if !ok {
+		return nil, os.NewError("no queue size")
+	}
+	qi.Size = int(size)
+	return &qi, nil
+}
+
 // Get takes one Message off of the queue. The Message will be returned to the queue
 // if not deleted before the item's timeout.
 func (q *Queue) Get() (*Message, os.Error) {

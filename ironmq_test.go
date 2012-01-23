@@ -7,7 +7,13 @@ import (
 
 func TestFunctionality(t *testing.T) {
 	projectId := os.Getenv("IRONIO_PROJECT_ID")
+	if projectId == "" {
+		t.Fatalf("IRONIO_PROJECT_ID environment variable not set")
+	}
 	token := os.Getenv("IRONIO_TOKEN")
+	if token == "" {
+		t.Fatalf("IRONIO_TOKEN environment variable not set")
+	}
 
 	client := NewClient(projectId, token)
 	queue := client.Queue("test-queue")
@@ -25,6 +31,14 @@ func TestFunctionality(t *testing.T) {
 	err = queue.Push(body)
 	if err != nil {
 		t.Fatalf("queue.Push: error isn't nil: %s", err)
+	}
+
+	qi, err := queue.Info()
+	if err != nil {
+		t.Fatalf("queue.Info: error isn't nil: %s", err)
+	}
+	if qi.Size != 1 {
+		t.Errorf("queue.Info: size isn't 1: %v", qi.Size)
 	}
 
 	msg, err := queue.Get()
