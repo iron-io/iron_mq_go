@@ -31,14 +31,14 @@ var EmptyQueue = os.NewError("queue is empty")
 
 func (e *Error) String() string { return fmt.Sprintf("Status %d: %s", e.Status, e.Msg) }
 
-func (c *Client) req(method, endpoint string, body []byte) (map[string]interface{}, os.Error) {
+func (c *Client) req(method, endpoint string, body []byte, data interface{}) os.Error {
 	const host = "mq-aws-us-east-1.iron.io"
 	const apiVersion = "1"
 	url := path.Join(host, apiVersion, "projects", c.projectId, endpoint)
 	url = "http://" + url + "?oauth=" + c.token
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
@@ -46,7 +46,7 @@ func (c *Client) req(method, endpoint string, body []byte) (map[string]interface
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if c.Debug {
@@ -58,19 +58,22 @@ func (c *Client) req(method, endpoint string, body []byte) (map[string]interface
 		}
 	}
 
-	jDecoder := json.NewDecoder(resp.Body)
-	data := map[string]interface{}{}
-	err = jDecoder.Decode(&data)
-	if err != nil {
-		return nil, err
-	}
-	resp.Body.Close()
-
+	decoder := json.NewDecoder(resp.Body)
+	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
+		data := map[string]interface{}{}
+		decoder.Decode(&data)
 		msg, _ := data["msg"].(string)
-		return nil, &Error{resp.StatusCode, msg}
+		return &Error{resp.StatusCode, msg}
 	}
-	return data, nil
+
+	if data != nil {
+		err = decoder.Decode(data)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Queue represents an IronMQ queue.
@@ -93,34 +96,29 @@ type QueueInfo struct {
 // Info retrieves a QueueInfo structure for the queue.
 func (q *Queue) Info() (*QueueInfo, os.Error) {
 	var qi QueueInfo
-	resp, err := q.Client.req("GET", "queues/"+q.name, nil)
+	err := q.Client.req("GET", "queues/"+q.name, nil, &qi)
 	if err != nil {
 		return nil, err
 	}
-	size, ok := resp["size"].(float64)
-	if !ok {
-		return nil, os.NewError("no queue size")
-	}
-	qi.Size = int(size)
 	return &qi, nil
 }
 
 // Get takes one Message off of the queue. The Message will be returned to the queue
 // if not deleted before the item's timeout.
 func (q *Queue) Get() (*Message, os.Error) {
-	resp, err := q.Client.req("GET", "queues/"+q.name+"/messages", nil)
+	var resp struct {
+		Msgs []*Message `json:"messages"`
+	}
+	err := q.Client.req("GET", "queues/"+q.name+"/messages", nil, &resp)
 	if err != nil {
 		return nil, err
 	}
-	body, ok := resp["body"].(string)
-	if !ok {
+	if len(resp.Msgs) == 0 {
 		return nil, EmptyQueue
 	}
-	id, ok := resp["id"].(string)
-	if !ok {
-		return nil, os.NewError("ID is not a string")
-	}
-	return &Message{Id: id, Body: body, q: q}, nil
+	msg := resp.Msgs[0]
+	msg.q = q
+	return msg, nil
 }
 
 // Push adds a message to the end of the queue using IronMQ's defaults:
@@ -137,11 +135,7 @@ func (q *Queue) PushMsg(msg *Message) os.Error {
 	if err != nil {
 		return err
 	}
-	_, err = q.Client.req("POST", "queues/"+q.name+"/messages", data)
-	if err != nil {
-		return err
-	}
-	return nil
+	return q.Client.req("POST", "queues/"+q.name+"/messages", data, nil)
 }
 
 type Message struct {
@@ -157,6 +151,5 @@ type Message struct {
 }
 
 func (m *Message) Delete() os.Error {
-	_, err := m.q.Client.req("DELETE", "queues/"+m.q.name+"/messages/"+m.Id, nil)
-	return err
+	return m.q.Client.req("DELETE", "queues/"+m.q.name+"/messages/"+m.Id, nil, nil)
 }
