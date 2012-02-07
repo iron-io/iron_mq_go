@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=github.com/iron-io/ironmq_go
+TARG=github.com/iron-io/iron_mq_go
 GOFILES=\
 	ironmq.go\
 
