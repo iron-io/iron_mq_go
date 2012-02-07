@@ -2,10 +2,11 @@ package ironmq
 
 import (
 	"bytes"
+	"encoding/json"
+	"errors"
 	"fmt"
-	"http"
-	"json"
-	"os"
+	"net/http"
+	"net/http/httputil"
 	"path"
 )
 
@@ -27,11 +28,11 @@ type Error struct {
 	Msg    string
 }
 
-var EmptyQueue = os.NewError("queue is empty")
+var EmptyQueue = errors.New("queue is empty")
 
-func (e *Error) String() string { return fmt.Sprintf("Status %d: %s", e.Status, e.Msg) }
+func (e *Error) Error() string { return fmt.Sprintf("Status %d: %s", e.Status, e.Msg) }
 
-func (c *Client) req(method, endpoint string, body []byte, data interface{}) os.Error {
+func (c *Client) req(method, endpoint string, body []byte, data interface{}) error {
 	const host = "mq-aws-us-east-1.iron.io"
 	const apiVersion = "1"
 	url := path.Join(host, apiVersion, "projects", c.projectId, endpoint)
@@ -50,7 +51,7 @@ func (c *Client) req(method, endpoint string, body []byte, data interface{}) os.
 	}
 
 	if c.Debug {
-		dump, err := http.DumpResponse(resp, true)
+		dump, err := httputil.DumpResponse(resp, true)
 		if err != nil {
 			fmt.Println("error dumping response:", err)
 		} else {
@@ -94,7 +95,7 @@ type QueueInfo struct {
 }
 
 // Info retrieves a QueueInfo structure for the queue.
-func (q *Queue) Info() (*QueueInfo, os.Error) {
+func (q *Queue) Info() (*QueueInfo, error) {
 	var qi QueueInfo
 	err := q.Client.req("GET", "queues/"+q.name, nil, &qi)
 	if err != nil {
@@ -105,7 +106,7 @@ func (q *Queue) Info() (*QueueInfo, os.Error) {
 
 // Get takes one Message off of the queue. The Message will be returned to the queue
 // if not deleted before the item's timeout.
-func (q *Queue) Get() (*Message, os.Error) {
+func (q *Queue) Get() (*Message, error) {
 	var resp struct {
 		Msgs []*Message `json:"messages"`
 	}
@@ -124,13 +125,13 @@ func (q *Queue) Get() (*Message, os.Error) {
 // Push adds a message to the end of the queue using IronMQ's defaults:
 //	timeout - 60 seconds
 //	delay - none
-func (q *Queue) Push(msg string) (id string, err os.Error) {
+func (q *Queue) Push(msg string) (id string, err error) {
 	return q.PushMsg(&Message{Body: msg})
 }
 
 // PushMsg adds a message to the end of the queue using the fields of msg as
 // parameters. msg.Id is ignored.
-func (q *Queue) PushMsg(msg *Message) (id string, err os.Error) {
+func (q *Queue) PushMsg(msg *Message) (id string, err error) {
 	msgs := struct {
 		Messages []*Message `json:"messages"`
 	}{
@@ -162,6 +163,6 @@ type Message struct {
 	q     *Queue
 }
 
-func (m *Message) Delete() os.Error {
+func (m *Message) Delete() error {
 	return m.q.Client.req("DELETE", "queues/"+m.q.name+"/messages/"+m.Id, nil, nil)
 }

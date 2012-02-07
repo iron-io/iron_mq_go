@@ -19,7 +19,7 @@ func TestFunctionality(t *testing.T) {
 	queue := client.Queue("test-queue")
 
 	// clear out the queue
-	var err os.Error
+	var err error
 	for err == nil {
 		_, err = queue.Get()
 	}
