@@ -124,18 +124,30 @@ func (q *Queue) Get() (*Message, os.Error) {
 // Push adds a message to the end of the queue using IronMQ's defaults:
 //	timeout - 60 seconds
 //	delay - none
-func (q *Queue) Push(msg string) os.Error {
+func (q *Queue) Push(msg string) (id string, err os.Error) {
 	return q.PushMsg(&Message{Body: msg})
 }
 
 // PushMsg adds a message to the end of the queue using the fields of msg as
 // parameters. msg.Id is ignored.
-func (q *Queue) PushMsg(msg *Message) os.Error {
-	data, err := json.Marshal(msg)
-	if err != nil {
-		return err
+func (q *Queue) PushMsg(msg *Message) (id string, err os.Error) {
+	msgs := struct {
+		Messages []*Message `json:"messages"`
+	}{
+		[]*Message{msg},
 	}
-	return q.Client.req("POST", "queues/"+q.name+"/messages", data, nil)
+	data, err := json.Marshal(msgs)
+	if err != nil {
+		return "", err
+	}
+	var resp struct {
+		IDs []string `json:"ids"`
+	}
+	err = q.Client.req("POST", "queues/"+q.name+"/messages", data, &resp)
+	if err != nil {
+		return "", err
+	}
+	return resp.IDs[0], nil
 }
 
 type Message struct {

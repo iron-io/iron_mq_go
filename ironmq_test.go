@@ -28,9 +28,12 @@ func TestFunctionality(t *testing.T) {
 	}
 
 	const body = "Hello, IronMQ!"
-	err = queue.Push(body)
+	id, err := queue.Push(body)
 	if err != nil {
 		t.Fatalf("queue.Push: error isn't nil: %s", err)
+	}
+	if len(id) == 0 {
+		t.Fatal("queue.Push: no ID returned")
 	}
 
 	qi, err := queue.Info()
