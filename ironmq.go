@@ -54,7 +54,7 @@ func (c *Client) req(method, endpoint string, body []byte, data interface{}) os.
 		if err != nil {
 			fmt.Println("error dumping response:", err)
 		} else {
-			fmt.Printf("%s\n", dump)
+			fmt.Printf("IRONMQ_GO_CLIENT:  %s\n", dump)
 		}
 	}
 
