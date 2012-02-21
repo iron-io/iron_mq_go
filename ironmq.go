@@ -12,14 +12,15 @@ import (
 // A Client contains an Iron.io project ID and a token for authentication.
 type Client struct {
 	Debug     bool
+	cloud     *Cloud
 	projectId string
 	token     string
 }
 
 // NewClient returns a new Client using the given project ID and token.
 // The network is not used during this call.
-func NewClient(projectId, token string) *Client {
-	return &Client{projectId: projectId, token: token}
+func NewClient(projectId, token string, cloud *Cloud) *Client {
+	return &Client{projectId: projectId, token: token, cloud: cloud}
 }
 
 type Error struct {
@@ -32,10 +33,9 @@ var EmptyQueue = os.NewError("queue is empty")
 func (e *Error) String() string { return fmt.Sprintf("Status %d: %s", e.Status, e.Msg) }
 
 func (c *Client) req(method, endpoint string, body []byte, data interface{}) os.Error {
-	const host = "mq-aws-us-east-1.iron.io"
 	const apiVersion = "1"
-	url := path.Join(host, apiVersion, "projects", c.projectId, endpoint)
-	url = "http://" + url + "?oauth=" + c.token
+	url := path.Join(c.cloud.host, apiVersion, "projects", c.projectId, endpoint)
+	url = c.cloud.scheme + "://" + url + "?oauth=" + c.token
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
 		return err

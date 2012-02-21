@@ -14,7 +14,7 @@ The Basics
 ==========
 **Initialize** a client and get a queue object:
 
-    client := ironmq.NewClient("my project", "my token")
+    client := ironmq.NewClient("my project", "my token", ironmq.IronAWSUSEast)
     queue := client.Queue("my_queue")
 
 **Push** a message on the queue:
