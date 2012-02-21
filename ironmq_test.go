@@ -15,7 +15,7 @@ func TestFunctionality(t *testing.T) {
 		t.Fatalf("IRONIO_TOKEN environment variable not set")
 	}
 
-	client := NewClient(projectId, token)
+	client := NewClient(projectId, token, IronAWSUSEast)
 	queue := client.Queue("test-queue")
 
 	// clear out the queue
