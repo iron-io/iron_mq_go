@@ -79,7 +79,7 @@ func (c *Client) req(method, endpoint string, body []byte, data interface{}) err
 
 // Queue represents an IronMQ queue.
 type Queue struct {
-	name   string
+	Name   string
 	Client *Client
 }
 
@@ -97,7 +97,7 @@ type QueueInfo struct {
 // Info retrieves a QueueInfo structure for the queue.
 func (q *Queue) Info() (*QueueInfo, error) {
 	var qi QueueInfo
-	err := q.Client.req("GET", "queues/"+q.name, nil, &qi)
+	err := q.Client.req("GET", "queues/"+q.Name, nil, &qi)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (q *Queue) Get() (*Message, error) {
 	var resp struct {
 		Msgs []*Message `json:"messages"`
 	}
-	err := q.Client.req("GET", "queues/"+q.name+"/messages", nil, &resp)
+	err := q.Client.req("GET", "queues/"+q.Name+"/messages", nil, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (q *Queue) PushMsg(msg *Message) (id string, err error) {
 	var resp struct {
 		IDs []string `json:"ids"`
 	}
-	err = q.Client.req("POST", "queues/"+q.name+"/messages", data, &resp)
+	err = q.Client.req("POST", "queues/"+q.Name+"/messages", data, &resp)
 	if err != nil {
 		return "", err
 	}
@@ -164,5 +164,5 @@ type Message struct {
 }
 
 func (m *Message) Delete() error {
-	return m.q.Client.req("DELETE", "queues/"+m.q.name+"/messages/"+m.Id, nil, nil)
+	return m.q.Client.req("DELETE", "queues/"+m.q.Name+"/messages/"+m.Id, nil, nil)
 }
