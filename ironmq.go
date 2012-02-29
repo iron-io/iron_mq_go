@@ -90,11 +90,15 @@ func (c *Client) Queue(name string) *Queue {
 
 // QueueInfo provides general information about a queue.
 type QueueInfo struct {
-	Size int // number of items available on the queue
-	NextMessageTime  int64         `json:"next_message_time,omitempty"`
-	MaxConcurrency   uint64        `json:"max_concurrency,omitempty"`
-	MaxReqPerMinute  uint64        `json:"max_req_per_minute,omitempty"`
-	WebhookUrl       string        `json:"webhook_url,omitempty"`
+	// number of items available on the queue
+	Size int
+	// Next time a message will be visible on this queue.
+	// Format: RFC3339 timestamp.  If no messages remain in queue, 
+	// this value is omitted from the response
+	NextMessageTime string `json:"next_message_time,omitempty"`
+	MaxConcurrency  uint64 `json:"max_concurrency,omitempty"`
+	MaxReqPerMinute uint64 `json:"max_req_per_minute,omitempty"`
+	WebhookUrl      string `json:"webhook_url,omitempty"`
 }
 
 // Info retrieves a QueueInfo structure for the queue.
