@@ -91,6 +91,10 @@ func (c *Client) Queue(name string) *Queue {
 // QueueInfo provides general information about a queue.
 type QueueInfo struct {
 	Size int // number of items available on the queue
+	NextMessageTime  int64         `json:"next_message_time,omitempty"`
+	MaxConcurrency   uint64        `json:"max_concurrency,omitempty"`
+	MaxReqPerMinute  uint64        `json:"max_req_per_minute,omitempty"`
+	WebhookUrl       string        `json:"webhook_url,omitempty"`
 }
 
 // Info retrieves a QueueInfo structure for the queue.
@@ -150,6 +154,10 @@ func (q *Queue) PushMsg(msg *Message) (id string, err os.Error) {
 	return resp.IDs[0], nil
 }
 
+func (q *Queue) DeleteMsg(id string) os.Error {
+	return q.Client.req("DELETE", "queues/"+q.name+"/messages/"+id, nil, nil)
+}
+
 type Message struct {
 	Id   string `json:"id,omitempty"`
 	Body string `json:"body"`
@@ -163,5 +171,5 @@ type Message struct {
 }
 
 func (m *Message) Delete() os.Error {
-	return m.q.Client.req("DELETE", "queues/"+m.q.name+"/messages/"+m.Id, nil, nil)
+	return m.q.DeleteMsg(m.Id)
 }
