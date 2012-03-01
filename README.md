@@ -32,3 +32,13 @@ default timeout is 10 minutes.)
 **Delete** a message from the queue:
 
     err := msg.Delete()
+
+
+Switching Clouds
+================
+
+You can switch to Rackspace by changing the Cloud/Region when creating the client. 
+
+    client := ironmq.NewClient("my project", "my token", ironmq.IronRackspaceDFW)
+    
+See cloud.go for full list.
