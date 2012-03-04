@@ -5,10 +5,35 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/http/httputil"
 	"path"
+	"sync"
+	"time"
 )
+
+// Copied straight from Go's package rand since it's not exported.
+type lockedSource struct {
+	lk  sync.Mutex
+	src rand.Source
+}
+
+func (r *lockedSource) Int63() (n int64) {
+	r.lk.Lock()
+	n = r.src.Int63()
+	r.lk.Unlock()
+	return
+}
+
+func (r *lockedSource) Seed(seed int64) {
+	r.lk.Lock()
+	r.src.Seed(seed)
+	r.lk.Unlock()
+}
+
+var localRand = rand.New(&lockedSource{src: rand.NewSource(time.Now().Unix())})
 
 // A Client contains an Iron.io project ID and a token for authentication.
 type Client struct {
@@ -45,9 +70,28 @@ func (c *Client) req(method, endpoint string, body []byte, data interface{}) err
 		req.Header.Set("Content-Type", "application/json")
 		req.ContentLength = int64(len(body))
 	}
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
+
+	const maxRetries = 5
+	tries := uint(0)
+	var resp *http.Response
+	for tries < maxRetries {
+		resp, err = http.DefaultClient.Do(req)
+		if err != nil {
+			return err
+		}
+		// ELB sometimes returns this when load is increasing; we retry
+		// with exponential backoff
+		if resp.StatusCode == http.StatusServiceUnavailable {
+			tries++
+			// random delay between 0 and (4^tries*100) milliseconds
+			pow := int64(1) << (2 * tries) * 100
+			delayMs := time.Duration(localRand.Int63n(pow))
+			fmt.Println("delay:", delayMs*time.Millisecond, tries)
+			time.Sleep(delayMs * time.Millisecond)
+			req.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+			continue
+		}
+		break
 	}
 
 	if c.Debug {
