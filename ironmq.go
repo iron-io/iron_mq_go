@@ -195,6 +195,10 @@ func (q *Queue) PushMsg(msg *Message) (id string, err error) {
 	return resp.IDs[0], nil
 }
 
+func (q *Queue) DeleteMsg(id string) error {
+	return q.Client.req("DELETE", "queues/"+q.Name+"/messages/"+id, nil, nil)
+}
+
 type Message struct {
 	Id   string `json:"id,omitempty"`
 	Body string `json:"body"`
@@ -208,5 +212,5 @@ type Message struct {
 }
 
 func (m *Message) Delete() error {
-	return m.q.Client.req("DELETE", "queues/"+m.q.Name+"/messages/"+m.Id, nil, nil)
+	return m.q.DeleteMsg(m.Id)
 }
