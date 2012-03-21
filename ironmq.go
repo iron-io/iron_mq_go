@@ -86,7 +86,6 @@ func (c *Client) req(method, endpoint string, body []byte, data interface{}) err
 			// random delay between 0 and (4^tries*100) milliseconds
 			pow := int64(1) << (2 * tries) * 100
 			delayMs := time.Duration(localRand.Int63n(pow))
-			fmt.Println("delay:", delayMs*time.Millisecond, tries)
 			time.Sleep(delayMs * time.Millisecond)
 			req.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 			continue
