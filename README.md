@@ -6,7 +6,7 @@ Getting Started
 
 Install the package:
 
-    go install github.com/iron-io/iron_mq_go
+    go get github.com/iron-io/iron_mq_go
 
 The API is documented [here](http://iron-io.github.com/iron_mq_go/).
 
