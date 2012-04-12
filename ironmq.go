@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -73,9 +74,13 @@ func (c *Client) req(method, endpoint string, body []byte, data interface{}) err
 
 	const maxRetries = 5
 	tries := uint(0)
+	expectingEOF := false
 	var resp *http.Response
 	for tries < maxRetries {
 		resp, err = http.DefaultClient.Do(req)
+		if expectingEOF && err == io.EOF {
+			continue
+		}
 		if err != nil {
 			return err
 		}
@@ -88,6 +93,9 @@ func (c *Client) req(method, endpoint string, body []byte, data interface{}) err
 			delayMs := time.Duration(localRand.Int63n(pow))
 			time.Sleep(delayMs * time.Millisecond)
 			req.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+			// the next retry is expected to fail; issue between Go's
+			// core library and ELB
+			expectingEOF = true
 			continue
 		}
 		break
