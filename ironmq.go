@@ -81,6 +81,7 @@ func (c *Client) req(method, endpoint string, body []byte, data interface{}) err
 		if err != nil {
 			if err == io.EOF && eofCount < 3 {
 				eofCount++
+				req.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 				continue
 			}
 			return err
