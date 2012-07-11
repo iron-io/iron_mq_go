@@ -13,6 +13,8 @@ import (
 	"path"
 	"sync"
 	"time"
+
+	"github.com/iron-io/golog"
 )
 
 // Copied straight from Go's package rand since it's not exported.
@@ -80,6 +82,7 @@ func (c *Client) req(method, endpoint string, body []byte, data interface{}) err
 		resp, err = http.DefaultClient.Do(req)
 		if err != nil {
 			if err == io.EOF && eofCount < 3 {
+				golog.Debugln("Retrying because of EOF", eofCount)
 				eofCount++
 				req.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 				continue
@@ -89,6 +92,7 @@ func (c *Client) req(method, endpoint string, body []byte, data interface{}) err
 		// ELB sometimes returns this when load is increasing; we retry
 		// with exponential backoff
 		if resp.StatusCode == http.StatusServiceUnavailable {
+			golog.Debugln("Retrying because of 503", tries)
 			tries++
 			// random delay between 0 and (4^tries*100) milliseconds
 			pow := int64(1) << (2 * tries) * 100
