@@ -82,7 +82,7 @@ func (c *Client) req(method, endpoint string, body []byte, data interface{}) err
 		resp, err = http.DefaultClient.Do(req)
 		if err != nil {
 			if err == io.EOF && eofCount < 3 {
-				golog.Debugln("Retrying because of EOF", eofCount)
+				golog.Debugf("Retrying because of EOF %v\nPayload: %s\n", eofCount, body)
 				eofCount++
 				req.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 				continue
@@ -92,7 +92,7 @@ func (c *Client) req(method, endpoint string, body []byte, data interface{}) err
 		// ELB sometimes returns this when load is increasing; we retry
 		// with exponential backoff
 		if resp.StatusCode == http.StatusServiceUnavailable {
-			golog.Debugln("Retrying because of 503", tries)
+			golog.Debugf("Retrying because of 503 %v\nPayload: %s\n", tries, body)
 			tries++
 			// random delay between 0 and (4^tries*100) milliseconds
 			pow := int64(1) << (2 * tries) * 100
