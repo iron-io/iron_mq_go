@@ -158,6 +158,11 @@ func (q *Queue) Info() (*QueueInfo, error) {
 	return &qi, nil
 }
 
+// Clear clears all messages from the queue.
+func (q *Queue) Clear() error {
+	return q.Client.req("POST", "queues/"+q.Name+"/clear", nil, nil)
+}
+
 // Get takes one Message off of the queue. The Message will be returned to the queue
 // if not deleted before the item's timeout.
 func (q *Queue) Get() (*Message, error) {
