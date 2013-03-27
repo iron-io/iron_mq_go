@@ -1,3 +1,5 @@
+# DEPRECATE!  Please use https://github.com/iron-io/iron_go 
+
 IronMQ Go Client
 ----------------
 
