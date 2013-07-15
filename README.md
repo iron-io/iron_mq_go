@@ -41,6 +41,6 @@ Switching Clouds
 
 You can switch to Rackspace by changing the Cloud/Region when creating the client. 
 
-    client := ironmq.NewClient("my project", "my token", ironmq.IronRackspaceDFW)
+    client := ironmq.NewClient("my project", "my token", ironmq.IronRackspaceORD)
     
 See cloud.go for full list.
