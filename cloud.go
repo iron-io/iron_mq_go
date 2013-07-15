@@ -12,4 +12,5 @@ func NewCloud(scheme, host string) *Cloud {
 var (
 	IronAWSUSEast    = NewCloud("https", "mq-aws-us-east-1.iron.io")
 	IronRackspaceDFW = NewCloud("https", "mq-rackspace-dfw.iron.io")
+	IronRackspaceORD = NewCloud("https", "mq-rackspace-ord.iron.io")
 )
